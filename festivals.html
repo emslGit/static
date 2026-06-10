@@ -271,11 +271,11 @@
         cross-check; not affiliated with any festival.</footer>
 
     <script>
-        const SPAN = 102;
-        const CHART_START = new Date(2026, 5, 3);
-        const DATA_OFFSET = 24; // existing festival offsets are counted from the old 27 Jun 2026 anchor
-        const MONTHS = [{ n: 'Jun', d: 0 }, { n: 'Jul', d: 28 }, { n: 'Aug', d: 59 }, { n: 'Sep', d: 90 }];
-        // week dividers fall on Mondays, counted in days from the 3 Jun 2026 chart anchor (index 0)
+        const SPAN = 87;
+        const CHART_START = new Date(2026, 5, 18);
+        const DATA_OFFSET = 9; // existing festival offsets are counted from the old 27 Jun 2026 anchor
+        const MONTHS = [{ n: 'Jun', d: 0 }, { n: 'Jul', d: 13 }, { n: 'Aug', d: 44 }, { n: 'Sep', d: 75 }];
+        // week dividers fall on Mondays, counted in days from the 18 Jun 2026 chart anchor (index 0)
         const MONTHDAYS = MONTHS.map(m => m.d);
         const start = f => f.s + DATA_OFFSET;
         const end = f => f.e + DATA_OFFSET;
