@@ -17,9 +17,9 @@
             --go: #D946EF;
             --clash: #FF2D2D;
             --open: #13C46A;
-            --soon: #FFB020;
+            --deadline: #FFB020;
             --closed: #FF5A5A;
-            --check: #D946EF;
+            --check: #FF8A00;
             --star: #F5A623;
             --staroff: #d8d6cc;
         }
@@ -258,7 +258,7 @@
         <span><i style="background:var(--go)"></i> Want to go</span>
         <span><i style="background:var(--clash)"></i> Clash</span>
         <span><i style="background:var(--open)"></i> Open</span>
-        <span><i style="background:var(--soon)"></i> Soon</span>
+        <span><i style="background:var(--deadline)"></i> Deadline</span>
         <span><i style="background:var(--check)"></i> Confirm</span>
     </div>
     <div class="note">Tap the ⓘ next to a festival for dates, location, population, genres and headliners.</div>
@@ -299,9 +299,9 @@
             }
             return out;
         })();
-        const ST = { open: 'var(--open)', soon: 'var(--soon)', closed: 'var(--closed)', check: 'var(--check)' };
-        const STT = { open: 'Open', soon: 'Deadline soon', closed: 'No route / closed', check: 'Confirm directly' };
-        const STC = { open: '#13C46A', soon: '#FFB020', closed: '#FF5A5A', check: '#D946EF' };
+        const ST = { open: 'var(--open)', deadline: 'var(--deadline)', closed: 'var(--closed)', check: 'var(--check)' };
+        const STT = { open: 'Open', deadline: 'Deadline', closed: 'No route / closed', check: 'Confirm directly' };
+        const STC = { open: '#13C46A', deadline: '#FFB020', closed: '#FF5A5A', check: '#FF8A00' };
         const GO = 'var(--go)', CLASH = 'var(--clash)';
 
         const F = [
@@ -324,7 +324,7 @@
             { id: 'dranouter', n: 'Festival Dranouter', s: 41, e: 43, st: 'open', stars: 2, dates: '7 – 9 Aug', dur: 3, loc: 'Heuvelland, BE', pop: 'Heuvelland ~8k (Ypres ~35k nearby)', gen: 'Folk, world, pop', h: 'Pommelien Thijs, The Kooks, Zaz, Sylvie Kreusch, MOXIE, Katherine Priddy', vol: 'Open via Eventication; min 3 festival days.' },
             { id: 'sziget', n: 'Sziget Festival', s: 45, e: 49, st: 'open', stars: 3, dates: '11 – 15 Aug', dur: 5, loc: 'Budapest, HU · ~2.5h flight', pop: 'Budapest ~1.69m', gen: 'Pop, rock, electronic', h: 'Twenty One Pilots, Florence, Lewis Capaldi, Zara Larsson, Bring Me The Horizon, Underworld, Dom Dolla', vol: 'Open via fesztivalonkentes.hu. ~6h/day, refundable deposit.' },
             { id: 'boomtown', n: 'Boomtown', s: 46, e: 50, st: 'check', stars: 2, dates: '12 – 16 Aug', dur: 5, loc: 'Winchester, UK', pop: 'Winchester ~50k', gen: 'Bass, DnB, reggae, ska', h: 'Skrillex, Four Tet, Faithless, Kneecap, Sub Focus, Madness, Scissor Sisters, Shaggy', vol: 'Sources conflict: Festaff says open (£250 bond, overnight shifts); Oxfam/MCUK closed. Re-verify.' },
-            { id: 'flow', n: 'Flow Festival', s: 48, e: 50, st: 'soon', stars: 3, dates: '14 – 16 Aug', dur: 3, loc: 'Helsinki, FI · ~1h flight', pop: 'Helsinki ~696k', gen: 'Indie, pop, electronic; UK bass & house (Front Yard)', h: 'Florence + The Machine, Nick Cave, Turnstile, PinkPantheress, Honey Dijon, Skream & Benga, Interplanetary Criminal', vol: 'Apply by Sun 14 Jun 17:00. Free access + meal + afterparty.' },
+            { id: 'flow', n: 'Flow Festival', s: 48, e: 50, st: 'deadline', stars: 3, dates: '14 – 16 Aug', dur: 3, loc: 'Helsinki, FI · ~1h flight', pop: 'Helsinki ~696k', gen: 'Indie, pop, electronic; UK bass & house (Front Yard)', h: 'Florence + The Machine, Nick Cave, Turnstile, PinkPantheress, Honey Dijon, Skream & Benga, Interplanetary Criminal', vol: 'Apply by Sun 14 Jun 17:00. Free access + meal + afterparty.' },
             { id: 'xrds', n: 'XRDS', s: 48, e: 49, st: 'open', stars: 2, dates: '14 – 15 Aug', dur: 2, loc: 'Brussels, BE', pop: 'Brussels ~1.25m (region)', gen: 'Techno, hard techno', h: 'Mall Grab, Ben Klock, Ben UFO, Dax J, SHERELLE, Goldie, Donato Dozzy', vol: 'Apply via official xrds.be form (not Eventication 2026).' },
             { id: 'reading', n: 'Reading Festival', s: 61, e: 64, st: 'open', stars: 3, dates: '27 – 30 Aug', dur: 4, loc: 'Reading, UK', pop: 'Reading ~183k', gen: 'Rock, indie, hip-hop', h: 'Florence, Charli XCX, Raye, Dave, Chase & Status, Fontaines D.C., Skepta', vol: 'Hotbox + Oxfam open; fills fast. UK right-to-volunteer needed.' },
             { id: 'leeds', n: 'Leeds Festival', s: 61, e: 64, st: 'open', stars: 3, dates: '27 – 30 Aug', dur: 4, loc: 'Leeds, UK', pop: 'Leeds ~845k (metro)', gen: 'Rock, indie, hip-hop', h: 'Kasabian, Florence, Charli XCX, Raye, Dave, Fontaines D.C., Skepta', vol: 'Hotbox + Oxfam open; fills fast. UK right-to-volunteer needed.' },
