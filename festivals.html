@@ -127,13 +127,32 @@
             top: 0;
             bottom: 0;
             width: 1px;
-            background: var(--border);
+            background: var(--faint);
+            opacity: .55;
+        }
+
+        .wgrid {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            border-left: 1px dashed var(--border);
+            opacity: .7;
         }
 
         .mlabel {
             position: absolute;
+            top: 0;
             font-size: 11px;
             color: var(--faint);
+        }
+
+        .wlabel {
+            position: absolute;
+            top: 15px;
+            transform: translateX(-50%);
+            font-size: 10px;
+            color: var(--muted);
+            white-space: nowrap;
         }
 
         .bar {
@@ -254,6 +273,23 @@
     <script>
         const SPAN = 78;
         const MONTHS = [{ n: 'Jul', d: 4 }, { n: 'Aug', d: 35 }, { n: 'Sep', d: 66 }];
+        // week dividers fall on Mondays, counted in days from the 27 Jun 2026 anchor (index 0)
+        const MONTHDAYS = MONTHS.map(m => m.d);
+        function isoWeek(dt) {
+            const d = new Date(Date.UTC(dt.getFullYear(), dt.getMonth(), dt.getDate()));
+            d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+            const y = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+            return Math.ceil((((d - y) / 86400000) + 1) / 7);
+        }
+        const WEEKS = (() => {
+            const anchor = new Date(2026, 5, 27), out = [];
+            for (let d = 0; d <= SPAN; d++) {
+                const dt = new Date(anchor);
+                dt.setDate(anchor.getDate() + d);
+                if (dt.getDay() === 1 && !MONTHDAYS.includes(d)) out.push({ d, w: isoWeek(dt) });
+            }
+            return out;
+        })();
         const ST = { open: 'var(--open)', soon: 'var(--soon)', closed: 'var(--closed)', check: 'var(--check)' };
         const STT = { open: 'Open', soon: 'Deadline soon', closed: 'No route / closed', check: 'Confirm directly' };
         const STC = { open: '#13C46A', soon: '#FFB020', closed: '#FF5A5A', check: '#3B9EFF' };
@@ -284,7 +320,7 @@
             { id: 'lostvillage', n: 'Lost Village', s: 61, e: 64, st: 'closed', stars: 0, dates: '27 – 30 Aug', dur: 4, loc: 'Norton Disney, Lincolnshire, UK', pop: '~250 village (Lincoln ~103k nearby)', gen: 'House, techno, disco', h: 'Caribou b2b Solomun, Ezra Collective, DJ Koze, Peggy Gou, Overmono, Soulwax', vol: 'No public volunteer route. Sold out.' },
             { id: 'dimensions', n: 'Dimensions Festival', s: 61, e: 65, st: 'check', stars: 1, dates: '27 – 31 Aug', dur: 5, loc: 'Tisno, HR · ~2.5h flight', pop: 'Tisno ~3k (Šibenik ~34k nearby)', gen: 'House, techno, electro, breaks', h: '150 artists across house, techno, electro and breaks', vol: 'Volunteer status unconfirmed. Direct outreach.' },
             { id: 'campercalling', n: 'Camper Calling', s: 62, e: 64, st: 'open', stars: 2, dates: '28 – 30 Aug', dur: 3, loc: 'Ragley Hall, Warwickshire, UK', pop: 'Near Alcester (Birmingham ~1.14m nearby)', gen: 'Pop, disco, classic hits', h: 'Nile Rodgers & CHIC, Primal Scream, Shed Seven, James Morrison, Sigala, Vengaboys, Five', vol: 'My Cause UK open; £150 deposit; 3×8h. UK right-to-volunteer needed.' },
-            { id: 'superbloom', n: 'Superbloom', s: 63, e: 69, st: 'check', stars: 2, dates: '29 Aug – 4 Sep', dur: 7, loc: 'Munich, DE · ~1.5h flight', pop: 'Munich ~1.51m', gen: 'Pop, electronic, indie', h: 'Lorde, Lewis Capaldi, Zara Larsson, Kygo, Paul Kalkbrenner, Ayliva, Sombr, Tom Odell', vol: 'Week format 2026 (Experience Days + nightly concerts), day tickets only. No volunteer info on official site — contact superbloom.de directly.' },
+            { id: 'superbloom', n: 'Superbloom', s: 63, e: 69, st: 'open', stars: 2, dates: '29 Aug – 4 Sep', dur: 7, loc: 'Munich, DE · ~1.5h flight', pop: 'Munich ~1.51m', gen: 'Pop, electronic, indie', h: 'Lorde, Lewis Capaldi, Zara Larsson, Kygo, Paul Kalkbrenner, Ayliva, Sombr, Tom Odell', vol: 'Volunteer via "Inklusion Muss Laut Sein" BUDDIE/awareness team (green-vest inclusion helpers) — flexible shifts, perks incl. shirt + catering. Register at i-m-l-s.com / info@i-m-l-s.com. Official site lists no general crew route.' },
             { id: 'forwards', n: 'Forwards Bristol', s: 63, e: 64, st: 'open', stars: 2, dates: '29 – 30 Aug', dur: 2, loc: 'Bristol, UK', pop: 'Bristol ~483k', gen: 'Indie, R&B, electronic', h: 'Tems, Self Esteem, Wet Leg, Little Simz, Oklou, Amyl & The Sniffers, Maribou State', vol: 'My Cause UK "Apply Now". No parking. UK right-to-volunteer needed.' },
             { id: 'gaudeamus', n: 'Gaudeamus Festival', s: 74, e: 78, st: 'open', stars: 2, dates: '9 – 13 Sep', dur: 5, loc: 'Utrecht, NL', pop: 'Utrecht ~367k', gen: 'Contemporary / new music', h: 'Mivos Quartet, TAK Ensemble, IEMA-Ensemble, New European Ensemble, The Carice Singers', vol: 'Open, final few slots; min 1 day, 4–6h parts.' },
             { id: 'hopduvel', n: 'Hopduvel', s: 76, e: 78, st: 'check', stars: 1, dates: '11 – 13 Sep', dur: 3, loc: 'Asse, BE', pop: 'Asse ~34k (Brussels ~1.25m nearby)', gen: 'Belgian pop, dance', h: 'Milk Inc., Laura Tesoro, Aaron Blommaert, Level Six, Like Me', vol: 'Committee model via hopduvel.be/help-mee (not Eventication).' }
@@ -325,8 +361,11 @@
         function render() {
             const clash = clashSet();
             let html = '';
-            html += '<div class="head"><div class="track" style="height:16px;">';
+            html += '<div class="head"><div class="track" style="height:28px;">';
+            WEEKS.forEach(wk => html += '<div class="wgrid" style="left:' + (wk.d / SPAN * 100) + '%"></div>');
+            MONTHS.forEach(m => html += '<div class="grid" style="left:' + (m.d / SPAN * 100) + '%"></div>');
             MONTHS.forEach(m => html += '<span class="mlabel" style="left:' + (m.d / SPAN * 100) + '%">' + m.n + '</span>');
+            WEEKS.forEach(wk => html += '<span class="wlabel" style="left:' + (wk.d / SPAN * 100) + '%">W' + wk.w + '</span>');
             html += '</div></div>';
             F.forEach((f, i) => {
                 const on = !!go[f.id], cl = !!clash[f.id];
@@ -340,6 +379,7 @@
                     : 'right:' + (100 - left) + '%; padding-right:6px; text-align:right;';
                 html += '<div class="row" style="background:' + rb + '">';
                 html += '<div class="track">';
+                WEEKS.forEach(wk => html += '<div class="wgrid" style="left:' + (wk.d / SPAN * 100) + '%"></div>');
                 MONTHS.forEach(m => html += '<div class="grid" style="left:' + (m.d / SPAN * 100) + '%"></div>');
                 html += '<div class="bar hov" data-id="' + f.id + '" style="left:' + left + '%; width:' + w + '%; background:' + col + ';' + (on ? 'box-shadow:0 0 0 1.5px ' + (cl ? CLASH : GO) + ';' : '') + '"></div>';
                 html += '<div class="flab" style="' + lab + '"><span class="hov" data-id="' + f.id + '" style="' + (on ? 'font-weight:600;' : '') + '">' + (cl ? '⚠ ' : '') + f.n + '</span><span class="info" data-info="' + f.id + '" title="Details">ⓘ</span></div>';
