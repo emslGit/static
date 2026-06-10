@@ -105,23 +105,6 @@
             border-radius: 6px;
         }
 
-        .stars {
-            flex: none;
-            white-space: nowrap;
-            padding-left: 4px;
-        }
-
-        .stars span {
-            font-size: 14px;
-            cursor: pointer;
-            color: var(--staroff);
-            line-height: 1;
-        }
-
-        .stars span.on {
-            color: var(--star);
-        }
-
         .name {
             flex: none;
             padding-right: 8px;
@@ -161,32 +144,51 @@
             cursor: pointer;
         }
 
-        #tip {
+        .flab {
             position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            white-space: nowrap;
+            font-size: 12.5px;
+            line-height: 1.2;
+            cursor: pointer;
+            color: var(--text);
+            max-width: 60%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .chev {
+            flex: none;
+            width: 22px;
+            text-align: center;
+            cursor: pointer;
+            color: var(--faint);
+            font-size: 10px;
+            line-height: 1;
+            user-select: none;
+            transition: transform .12s ease;
+        }
+
+        .chev.open {
+            transform: rotate(90deg);
+            color: var(--muted);
+        }
+
+        .detail {
             display: none;
-            width: 250px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            padding: 10px 12px;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, .18);
-            z-index: 20;
-            pointer-events: none;
+            padding: 8px 12px 12px 30px;
             font-size: 12px;
-        }
-
-        #tip .t {
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        #tip .l {
             color: var(--muted);
             line-height: 1.6;
+            border-radius: 6px;
         }
 
-        #tip .badge {
+        .detail.open {
+            display: block;
+        }
+
+        .detail .badge {
             font-size: 11px;
             padding: 1px 7px;
             border-radius: 6px;
@@ -215,27 +217,23 @@
                 padding: 3px 0 5px;
             }
 
-            .name {
-                order: 1;
-                flex: 1;
-                width: auto !important;
-            }
-
-            .stars {
-                order: 2;
-                width: auto !important;
-                padding-right: 8px;
+            .chev {
+                order: 0;
             }
 
             .track {
-                order: 3;
+                order: 1;
                 flex: none;
                 width: 100%;
-                height: 22px;
+                height: 28px;
             }
 
-            #tip {
-                width: min(250px, calc(100vw - 48px));
+            .flab {
+                max-width: 70%;
+            }
+
+            .detail {
+                padding-left: 12px;
             }
         }
     </style>
@@ -243,8 +241,8 @@
 
 <body>
     <h1>Festival planner 2026</h1>
-    <div class="sub">Click a bar or name to mark "want to go" · two overlapping picks turn red · click the stars to
-        rate (0–3, click a star again to clear). Saves in your browser.</div>
+    <div class="sub">Click a bar or name to mark "want to go" · two overlapping picks turn red · click the ▸ chevron
+        for full details. Saves in your browser.</div>
     <div class="legend">
         <span><i style="background:var(--go)"></i> Want to go</span>
         <span><i style="background:var(--clash)"></i> Clash</span>
@@ -253,10 +251,9 @@
         <span><i style="background:var(--check)"></i> Confirm</span>
         <span><i style="background:var(--closed)"></i> Closed</span>
     </div>
-    <div class="note">Hover a bar or name for dates, location, population, genres and headliners.</div>
+    <div class="note">Expand a row for dates, location, population, genres and headliners.</div>
     <div id="wrap">
         <div id="gantt"></div>
-        <div id="tip"></div>
     </div>
     <footer>Volunteer routes change fast — verify deadlines on official pages before applying. Built from a 2026
         cross-check; not affiliated with any festival.</footer>
@@ -300,66 +297,61 @@
             { id: 'hopduvel', n: 'Hopduvel', s: 76, e: 78, st: 'check', stars: 1, dates: '11 – 13 Sep', dur: 3, loc: 'Asse, BE', pop: 'Asse ~34k (Brussels ~1.25m nearby)', gen: 'Belgian pop, dance', h: 'Milk Inc., Laura Tesoro, Aaron Blommaert, Level Six, Like Me', vol: 'Committee model via hopduvel.be/help-mee (not Eventication).' }
         ];
 
-        const GOKEY = 'festgantt_go', RKEY = 'festgantt_rate';
-        let go = ld(GOKEY), rate = ld(RKEY);
+        const GOKEY = 'festgantt_go';
+        let go = ld(GOKEY);
         function ld(k) { try { const s = localStorage.getItem(k); if (s) return JSON.parse(s); } catch (e) { } return {}; }
         function sv(k, o) { try { localStorage.setItem(k, JSON.stringify(o)); } catch (e) { } }
-        function starsOf(f) { return rate[f.id] != null ? rate[f.id] : f.stars; }
         function clashSet() {
             const p = F.filter(f => go[f.id]), c = {};
             for (let i = 0; i < p.length; i++)for (let j = i + 1; j < p.length; j++) { const a = p[i], b = p[j]; if (a.s <= b.e && b.s <= a.e) { c[a.id] = true; c[b.id] = true; } } return c;
         }
 
-        const STARW = 52, LBL = 180;
-        const g = document.getElementById('gantt'), wrap = document.getElementById('wrap'), tip = document.getElementById('tip');
+        const CHEVW = 22;
+        const g = document.getElementById('gantt');
+        const exp = {};
+
+        function detailHTML(f, cl) {
+            const on = !!go[f.id];
+            const bg = on ? (cl ? 'rgba(255,45,45,.08)' : 'rgba(255,138,0,.08)') : 'transparent';
+            return '<div class="detail' + (exp[f.id] ? ' open' : '') + '" style="background:' + bg + '">' +
+                '📅 ' + f.dates + ' · ' + f.dur + ' days<br>📍 ' + f.loc + '<br>🏙 ' + f.pop + '<br>🎵 ' + f.gen +
+                '<div style="margin-top:4px"><span class="badge" style="background:' + STC[f.st] + '">' + STT[f.st] + '</span></div>' +
+                '<div style="margin-top:4px;color:var(--text)">' + f.vol + '</div>' +
+                '<div style="margin-top:4px;color:var(--faint)">★ ' + f.h + '</div></div>';
+        }
 
         function render() {
             const clash = clashSet();
             let html = '';
-            html += '<div class="head"><div style="width:' + (STARW + LBL) + 'px; flex:none;"></div><div class="track" style="height:16px;">';
+            html += '<div class="head"><div style="width:' + CHEVW + 'px; flex:none;"></div><div class="track" style="height:16px;">';
             MONTHS.forEach(m => html += '<span class="mlabel" style="left:' + (m.d / SPAN * 100) + '%">' + m.n + '</span>');
             html += '</div></div>';
             F.forEach((f, i) => {
-                const on = !!go[f.id], cl = !!clash[f.id], sc = starsOf(f);
+                const on = !!go[f.id], cl = !!clash[f.id];
                 const left = f.s / SPAN * 100, w = Math.max((f.e - f.s) / SPAN * 100, 1.6);
                 const col = on ? (cl ? CLASH : GO) : ST[f.st];
                 const rb = on ? (cl ? 'rgba(255,45,45,.13)' : 'rgba(255,138,0,.13)') : (i % 2 ? 'transparent' : 'var(--row)');
-                let st = ''; for (let k = 1; k <= 3; k++)st += '<span class="star' + (k <= sc ? ' on' : '') + '" data-id="' + f.id + '" data-n="' + k + '">★</span>';
+                // name sits beside the bar: right of it when the bar is on the left half, left of it otherwise
+                const leftSide = (left + w / 2) < 50;
+                const lab = leftSide
+                    ? 'left:' + (left + w) + '%; padding-left:6px;'
+                    : 'right:' + (100 - left) + '%; padding-right:6px; text-align:right;';
                 html += '<div class="row" style="background:' + rb + '">';
-                html += '<div class="stars" style="width:' + STARW + 'px">' + st + '</div>';
-                html += '<div class="name hov" data-id="' + f.id + '" style="width:' + LBL + 'px;' + (on ? 'font-weight:600;' : '') + '">' + (cl ? '⚠ ' : '') + f.n + '</div>';
+                html += '<div class="chev' + (exp[f.id] ? ' open' : '') + '" data-exp="' + f.id + '" title="Details">▶</div>';
                 html += '<div class="track">';
                 MONTHS.forEach(m => html += '<div class="grid" style="left:' + (m.d / SPAN * 100) + '%"></div>');
                 html += '<div class="bar hov" data-id="' + f.id + '" style="left:' + left + '%; width:' + w + '%; background:' + col + ';' + (on ? 'box-shadow:0 0 0 1.5px ' + (cl ? CLASH : GO) + ';' : '') + '"></div>';
+                html += '<div class="flab hov" data-id="' + f.id + '" style="' + lab + (on ? 'font-weight:600;' : '') + '">' + (cl ? '⚠ ' : '') + f.n + '</div>';
                 html += '</div></div>';
+                html += detailHTML(f, cl);
             });
             g.innerHTML = html;
 
             function toggle(id) { if (go[id]) delete go[id]; else go[id] = true; sv(GOKEY, go); render(); }
-            g.querySelectorAll('.hov').forEach(el => {
-                el.addEventListener('click', () => toggle(el.dataset.id));
-                el.addEventListener('mouseenter', () => showTip(el, clash));
-                el.addEventListener('mouseleave', () => tip.style.display = 'none');
-            });
-            g.querySelectorAll('.star').forEach(s => s.addEventListener('click', e => {
-                e.stopPropagation(); const id = s.dataset.id, n = +s.dataset.n, f = F.find(x => x.id === id);
-                rate[id] = (starsOf(f) === n) ? 0 : n; sv(RKEY, rate); render();
+            g.querySelectorAll('.hov').forEach(el => el.addEventListener('click', () => toggle(el.dataset.id)));
+            g.querySelectorAll('.chev').forEach(c => c.addEventListener('click', e => {
+                e.stopPropagation(); const id = c.dataset.exp; if (exp[id]) delete exp[id]; else exp[id] = true; render();
             }));
-        }
-
-        function showTip(a, clash) {
-            const f = F.find(x => x.id === a.dataset.id), sc = starsOf(f), cl = !!clash[f.id];
-            tip.innerHTML = '<div class="t">' + f.n + (cl ? ' <span style="color:' + CLASH + ';font-size:11px">· clashes</span>' : '') + '</div>' +
-                '<div class="l">📅 ' + f.dates + ' · ' + f.dur + ' days<br>📍 ' + f.loc + '<br>🏙 ' + f.pop + '<br>🎵 ' + f.gen +
-                '<div style="margin-top:4px"><span class="badge" style="background:' + STC[f.st] + '">' + STT[f.st] + '</span> <span style="color:var(--star)">' + '★'.repeat(sc) + '</span></div>' +
-                '<div style="margin-top:4px;color:var(--text)">' + f.vol + '</div>' +
-                '<div style="margin-top:4px;color:var(--faint)">★ ' + f.h + '</div></div>';
-            tip.style.display = 'block';
-            const wr = wrap.getBoundingClientRect(), ar = a.getBoundingClientRect();
-            let top = ar.top - wr.top + 22, leftpx = ar.left - wr.left;
-            const maxL = wr.width - 258; if (leftpx > maxL) leftpx = maxL; if (leftpx < 0) leftpx = 0;
-            const th = tip.offsetHeight; if (top + th > wr.height) top = ar.top - wr.top - th - 6;
-            tip.style.left = leftpx + 'px'; tip.style.top = top + 'px';
         }
         render();
     </script>
