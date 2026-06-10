@@ -279,6 +279,12 @@
         const MONTHDAYS = MONTHS.map(m => m.d);
         const start = f => f.s + DATA_OFFSET;
         const end = f => f.e + DATA_OFFSET;
+        const WD = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+        function weekday(off) {
+            const dt = new Date(CHART_START);
+            dt.setDate(CHART_START.getDate() + off);
+            return WD[dt.getDay()];
+        }
         function isoWeek(dt) {
             const d = new Date(Date.UTC(dt.getFullYear(), dt.getMonth(), dt.getDate()));
             d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
@@ -347,8 +353,10 @@
         let openId = null;
 
         function popHTML(f, cl) {
+            const ws = weekday(start(f)), we = weekday(end(f));
+            const wd = ws === we ? ws : ws + ' – ' + we;
             return '<div class="t">' + (cl ? '⚠ ' : '') + f.n + (cl ? ' <span style="color:' + CLASH + ';font-size:11px">· clashes</span>' : '') + '</div>' +
-                '📅 ' + f.dates + ' · ' + f.dur + ' days<br>📍 ' + f.loc + '<br>🏙 ' + f.pop + '<br>🎵 ' + f.gen +
+                '📅 ' + f.dates + ' (' + wd + ') · ' + f.dur + ' days<br>📍 ' + f.loc + '<br>🏙 ' + f.pop + '<br>🎵 ' + f.gen +
                 '<div style="margin-top:4px"><span class="badge" style="background:' + STC[f.st] + '">' + STT[f.st] + '</span></div>' +
                 '<div style="margin-top:4px;color:var(--text)">' + f.vol + '</div>' +
                 '<div style="margin-top:4px;color:var(--faint)">★ ' + f.h + '</div>';
