@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Festival Volunteer Gantt 2026</title>
+    <style>
+        :root {
+            --bg: #fafaf7;
+            --surface: #fff;
+            --row: #f3f2ec;
+            --border: #e3e1d8;
+            --text: #1c1c1a;
+            --muted: #6b6a64;
+            --faint: #9a988f;
+            --go: #FF8A00;
+            --clash: #FF2D2D;
+            --open: #13C46A;
+            --soon: #FFB020;
+            --closed: #FF5A5A;
+            --check: #3B9EFF;
+            --star: #F5A623;
+            --staroff: #d8d6cc;
+        }
+
+        @media (prefers-color-scheme:dark) {
+            :root {
+                --bg: #15171c;
+                --surface: #1c1f26;
+                --row: #22252e;
+                --border: #2e323c;
+                --text: #e8eaef;
+                --muted: #9aa0ad;
+                --faint: #6c727e;
+                --staroff: #3a3f4a;
+            }
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            padding: 20px;
+            line-height: 1.4;
+        }
+
+        h1 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .sub {
+            font-size: 13px;
+            color: var(--muted);
+            margin-bottom: 14px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-bottom: 6px;
+            font-size: 12px;
+            color: var(--muted);
+        }
+
+        .legend i {
+            display: inline-block;
+            width: 10px;
+            height: 10px;
+            border-radius: 2px;
+            vertical-align: 0;
+        }
+
+        .note {
+            font-size: 12px;
+            color: var(--faint);
+            margin-bottom: 10px;
+        }
+
+        #wrap {
+            position: relative;
+            max-width: 920px;
+        }
+
+        .head {
+            display: flex;
+            align-items: flex-end;
+            margin-bottom: 2px;
+        }
+
+        .row {
+            display: flex;
+            align-items: center;
+            height: 26px;
+            border-radius: 6px;
+        }
+
+        .stars {
+            flex: none;
+            white-space: nowrap;
+            padding-left: 4px;
+        }
+
+        .stars span {
+            font-size: 14px;
+            cursor: pointer;
+            color: var(--staroff);
+            line-height: 1;
+        }
+
+        .stars span.on {
+            color: var(--star);
+        }
+
+        .name {
+            flex: none;
+            padding-right: 8px;
+            padding-left: 6px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            font-size: 12.5px;
+            cursor: pointer;
+        }
+
+        .track {
+            flex: 1;
+            position: relative;
+            height: 100%;
+        }
+
+        .grid {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: var(--border);
+        }
+
+        .mlabel {
+            position: absolute;
+            font-size: 11px;
+            color: var(--faint);
+        }
+
+        .bar {
+            position: absolute;
+            top: 5px;
+            height: 16px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        #tip {
+            position: absolute;
+            display: none;
+            width: 250px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 10px 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, .18);
+            z-index: 20;
+            pointer-events: none;
+            font-size: 12px;
+        }
+
+        #tip .t {
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        #tip .l {
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        #tip .badge {
+            font-size: 11px;
+            padding: 1px 7px;
+            border-radius: 6px;
+            color: #fff;
+        }
+
+        footer {
+            max-width: 920px;
+            margin-top: 18px;
+            font-size: 11px;
+            color: var(--faint);
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Festival volunteer planner 2026</h1>
+    <div class="sub">Click a bar or name to mark "want to go" · two overlapping picks turn red · click the stars to
+        rate. Saves in your browser.</div>
+    <div class="legend">
+        <span><i style="background:var(--go)"></i> Want to go</span>
+        <span><i style="background:var(--clash)"></i> Clash</span>
+        <span><i style="background:var(--open)"></i> Open</span>
+        <span><i style="background:var(--soon)"></i> Soon</span>
+        <span><i style="background:var(--check)"></i> Confirm</span>
+        <span><i style="background:var(--closed)"></i> Closed</span>
+    </div>
+    <div class="note">Hover a bar or name for dates, location, population, genres and headliners.</div>
+    <div id="wrap">
+        <div id="gantt"></div>
+        <div id="tip"></div>
+    </div>
+    <footer>Volunteer routes change fast — verify deadlines on official pages before applying. Built from a 2026
+        cross-check; not affiliated with any festival.</footer>
+
+    <script>
+        const SPAN = 78;
+        const MONTHS = [{ n: 'Jul', d: 4 }, { n: 'Aug', d: 35 }, { n: 'Sep', d: 66 }];
+        const ST = { open: 'var(--open)', soon: 'var(--soon)', closed: 'var(--closed)', check: 'var(--check)' };
+        const STT = { open: 'Open', soon: 'Deadline soon', closed: 'No route / closed', check: 'Confirm directly' };
+        const STC = { open: '#13C46A', soon: '#FFB020', closed: '#FF5A5A', check: '#3B9EFF' };
+        const GO = 'var(--go)', CLASH = 'var(--clash)';
+
+        const F = [
+            { id: 'roskilde', n: 'Roskilde Festival', s: 0, e: 7, st: 'open', stars: 5, dates: '27 Jun – 4 Jul', dur: 8, loc: 'Roskilde, DK · ~1h flight', pop: 'Roskilde ~53k (Copenhagen ~672k nearby)', gen: 'Indie, rock, pop, electronic', h: 'The Cure, Gorillaz, Jennie, Little Simz, Kneecap, David Byrne, Wolf Alice, Djrum', vol: 'GA sold out — volunteering now main way in. Best perks: village, food, showers.' },
+            { id: 'kappa', n: 'Kappa FuturFestival', s: 6, e: 8, st: 'closed', stars: 1, dates: '3 – 5 Jul', dur: 3, loc: 'Turin, IT', pop: 'Turin ~859k', gen: 'Techno, house', h: 'Skrillex b2b Four Tet, Peggy Gou, Solomun, Charlotte de Witte, Amelie Lens, Carl Craig', vol: 'No volunteer route. Sold out (waitlist).' },
+            { id: 'lovesupreme', n: 'Love Supreme', s: 6, e: 8, st: 'closed', stars: 2, dates: '3 – 5 Jul', dur: 3, loc: 'Glynde, East Sussex, UK', pop: 'Glynde village ~200 (Brighton ~277k nearby)', gen: 'Jazz, soul, funk', h: 'Loyle Carner, Ezra Collective, De La Soul, Maxwell, Sister Sledge, Samara Joy', vol: 'Festaff waitlist only.' },
+            { id: 'loveintl', n: 'Love International', s: 11, e: 17, st: 'check', stars: 2, dates: '8 – 14 Jul', dur: 7, loc: 'Tisno, HR · ~2.5h flight', pop: 'Tisno ~3k (Šibenik ~34k nearby)', gen: 'House, disco, Balearic', h: 'John Talabot, Optimo, Palms Trax, Midland, Crazy P, Daniel Avery, Nightmares on Wax', vol: 'House/disco heaven but volunteer status unconfirmed. Direct outreach.' },
+            { id: 'audioriver', n: 'Audioriver', s: 13, e: 15, st: 'closed', stars: 1, dates: '10 – 12 Jul', dur: 3, loc: 'Łódź, PL', pop: 'Łódź ~646k', gen: 'Techno, DnB, electronic', h: 'The Prodigy, ZHU, Boys Noize, Ben Klock, I Hate Models, Ellen Allien, Len Faki', vol: 'No official volunteer route. Paid ticket only.' },
+            { id: 'latitude', n: 'Latitude Festival', s: 26, e: 29, st: 'open', stars: 3, dates: '23 – 26 Jul', dur: 4, loc: 'Henham Park, Suffolk, UK', pop: 'Near Southwold (Ipswich ~144k nearby)', gen: 'Indie, pop, alternative', h: 'David Byrne, Teddy Swims, Lewis Capaldi, Wet Leg, Self Esteem, The Last Dinner Party, The Flaming Lips', vol: 'Hotbox open; 3×8h shifts; deposit. UK right-to-volunteer needed.' },
+            { id: 'outlook', n: 'Outlook Festival', s: 26, e: 30, st: 'check', stars: 2, dates: '23 – 27 Jul', dur: 5, loc: 'Tisno, HR · ~2.5h flight', pop: 'Tisno ~3k (Šibenik ~34k nearby)', gen: 'Bass, DnB, dub, garage', h: 'Chase & Status, Goldie, Ben UFO, Kode9, Mala, Fabio & Grooverider', vol: 'Near-perfect genre fit but NO volunteer route found. Email The Garden Productions.' },
+            { id: 'dekmantel', n: 'Dekmantel', s: 32, e: 36, st: 'open', stars: 5, dates: '29 Jul – 2 Aug', dur: 5, loc: 'Amsterdam, NL · ~2h flight', pop: 'Amsterdam ~942k', gen: 'House, techno, electro, breaks', h: 'Jeff Mills, Skrillex, DARKSIDE, Ben UFO, Ricardo Villalobos, Helena Hauff, James Holden', vol: 'Registration open, roles allocated early June. Free access + merch/food card.' },
+            { id: 'letitroll', n: 'Let It Roll', s: 33, e: 36, st: 'closed', stars: 4, dates: '30 Jul – 1 Aug', dur: 3, loc: 'Most, CZ · ~2h flight', pop: 'Most ~63.7k', gen: 'Drum & bass', h: 'Pendulum, Netsky, Rusko, LTJ Bukem, Chase & Status, Wilkinson, Camo & Krooked', vol: 'Deadline was end of May — likely closed. Full-ticket-price deposit.' },
+            { id: 'odays', n: 'O Days', s: 33, e: 35, st: 'open', stars: 4, dates: '30 Jul – 1 Aug', dur: 3, loc: 'Copenhagen, DK', pop: 'Copenhagen ~672k', gen: 'House, electronic, pop', h: 'Disclosure, Mall Grab, Nia Archives, Joy Orbison, Yaeji, Courtesy, The Dare', vol: 'Crewstack registration live (CSV "waitlist" outdated).' },
+            { id: 'atn', n: 'All Together Now', s: 33, e: 36, st: 'check', stars: 3, dates: '30 Jul – 2 Aug', dur: 4, loc: 'Curraghmore, Waterford, IE', pop: 'Portlaw ~2k (Waterford ~54k nearby)', gen: 'Indie, electronic, folk', h: 'Pulp, Underworld, Ezra Collective, Floating Points, Christy Moore, Mogwai, Kae Tempest', vol: 'No public route found — email info@alltogethernow.ie. Sold out.' },
+            { id: 'campbestival', n: 'Camp Bestival Dorset', s: 33, e: 36, st: 'open', stars: 2, dates: '30 Jul – 2 Aug', dur: 4, loc: 'Lulworth Castle, Dorset, UK', pop: 'Near Wareham (Bournemouth ~196k nearby)', gen: 'Pop, dance, family', h: 'Fatboy Slim, Bastille, Self Esteem, De La Soul, Billy Ocean, Example, Black Grape', vol: 'Hotbox/Charity Concierge open; fills fast. UK right-to-volunteer needed.' },
+            { id: 'uppsala', n: 'Uppsala Reggae Festival', s: 34, e: 35, st: 'check', stars: 2, dates: '31 Jul – 1 Aug', dur: 2, loc: 'Uppsala, SE · ~50min train', pop: 'Uppsala ~177k', gen: 'Reggae, dancehall', h: 'The Skatalites, Barrington Levy, Mr. Vegas, Lutan Fyah, Dani M, Pressure Busspipe', vol: 'Closest to home. Crew via crew@uppsalareggaefestival.com, terms unposted. Genre stretch.' },
+            { id: 'dranouter', n: 'Festival Dranouter', s: 41, e: 43, st: 'open', stars: 3, dates: '7 – 9 Aug', dur: 3, loc: 'Heuvelland, BE', pop: 'Heuvelland ~8k (Ypres ~35k nearby)', gen: 'Folk, world, pop', h: 'Pommelien Thijs, The Kooks, Zaz, Sylvie Kreusch, MOXIE, Katherine Priddy', vol: 'Open via Eventication; min 3 festival days.' },
+            { id: 'sziget', n: 'Sziget Festival', s: 45, e: 49, st: 'open', stars: 4, dates: '11 – 15 Aug', dur: 5, loc: 'Budapest, HU · ~2.5h flight', pop: 'Budapest ~1.69m', gen: 'Pop, rock, electronic', h: 'Twenty One Pilots, Florence, Lewis Capaldi, Zara Larsson, Bring Me The Horizon, Underworld, Dom Dolla', vol: 'Open via fesztivalonkentes.hu. ~6h/day, refundable deposit.' },
+            { id: 'boomtown', n: 'Boomtown', s: 46, e: 50, st: 'check', stars: 3, dates: '12 – 16 Aug', dur: 5, loc: 'Winchester, UK', pop: 'Winchester ~50k', gen: 'Bass, DnB, reggae, ska', h: 'Skrillex, Four Tet, Faithless, Kneecap, Sub Focus, Madness, Scissor Sisters, Shaggy', vol: 'Sources conflict: Festaff says open (£250 bond, overnight shifts); Oxfam/MCUK closed. Re-verify.' },
+            { id: 'flow', n: 'Flow Festival', s: 48, e: 50, st: 'soon', stars: 5, dates: '14 – 16 Aug', dur: 3, loc: 'Helsinki, FI · ~1h flight', pop: 'Helsinki ~696k', gen: 'Indie, pop, electronic; UK bass & house (Front Yard)', h: 'Florence + The Machine, Nick Cave, Turnstile, PinkPantheress, Honey Dijon, Skream & Benga, Interplanetary Criminal', vol: 'Apply by Sun 14 Jun 17:00. Free access + meal + afterparty.' },
+            { id: 'xrds', n: 'XRDS', s: 48, e: 49, st: 'open', stars: 3, dates: '14 – 15 Aug', dur: 2, loc: 'Brussels, BE', pop: 'Brussels ~1.25m (region)', gen: 'Techno, hard techno', h: 'Mall Grab, Ben Klock, Ben UFO, Dax J, SHERELLE, Goldie, Donato Dozzy', vol: 'Apply via official xrds.be form (not Eventication 2026).' },
+            { id: 'reading', n: 'Reading Festival', s: 61, e: 64, st: 'open', stars: 4, dates: '27 – 30 Aug', dur: 4, loc: 'Reading, UK', pop: 'Reading ~183k', gen: 'Rock, indie, hip-hop', h: 'Florence, Charli XCX, Raye, Dave, Chase & Status, Fontaines D.C., Skepta', vol: 'Hotbox + Oxfam open; fills fast. UK right-to-volunteer needed.' },
+            { id: 'leeds', n: 'Leeds Festival', s: 61, e: 64, st: 'open', stars: 4, dates: '27 – 30 Aug', dur: 4, loc: 'Leeds, UK', pop: 'Leeds ~845k (metro)', gen: 'Rock, indie, hip-hop', h: 'Kasabian, Florence, Charli XCX, Raye, Dave, Fontaines D.C., Skepta', vol: 'Hotbox + Oxfam open; fills fast. UK right-to-volunteer needed.' },
+            { id: 'creamfields', n: 'Creamfields North', s: 61, e: 64, st: 'closed', stars: 1, dates: '27 – 30 Aug', dur: 4, loc: 'Daresbury, UK', pop: 'Daresbury ~246 (Liverpool/Manchester nearby)', gen: 'EDM, house, trance', h: 'Calvin Harris, Swedish House Mafia, Carl Cox, Tiësto, Martin Garrix, Armin van Buuren, FISHER', vol: 'Festaff waitlist only. UK right-to-volunteer needed.' },
+            { id: 'lostvillage', n: 'Lost Village', s: 61, e: 64, st: 'closed', stars: 1, dates: '27 – 30 Aug', dur: 4, loc: 'Norton Disney, Lincolnshire, UK', pop: '~250 village (Lincoln ~103k nearby)', gen: 'House, techno, disco', h: 'Caribou b2b Solomun, Ezra Collective, DJ Koze, Peggy Gou, Overmono, Soulwax', vol: 'No public volunteer route. Sold out.' },
+            { id: 'dimensions', n: 'Dimensions Festival', s: 61, e: 65, st: 'check', stars: 2, dates: '27 – 31 Aug', dur: 5, loc: 'Tisno, HR · ~2.5h flight', pop: 'Tisno ~3k (Šibenik ~34k nearby)', gen: 'House, techno, electro, breaks', h: '150 artists across house, techno, electro and breaks', vol: 'Volunteer status unconfirmed. Direct outreach.' },
+            { id: 'campercalling', n: 'Camper Calling', s: 62, e: 64, st: 'open', stars: 3, dates: '28 – 30 Aug', dur: 3, loc: 'Ragley Hall, Warwickshire, UK', pop: 'Near Alcester (Birmingham ~1.14m nearby)', gen: 'Pop, disco, classic hits', h: 'Nile Rodgers & CHIC, Primal Scream, Shed Seven, James Morrison, Sigala, Vengaboys, Five', vol: 'My Cause UK open; £150 deposit; 3×8h. UK right-to-volunteer needed.' },
+            { id: 'forwards', n: 'Forwards Bristol', s: 63, e: 64, st: 'open', stars: 3, dates: '29 – 30 Aug', dur: 2, loc: 'Bristol, UK', pop: 'Bristol ~483k', gen: 'Indie, R&B, electronic', h: 'Tems, Self Esteem, Wet Leg, Little Simz, Oklou, Amyl & The Sniffers, Maribou State', vol: 'My Cause UK "Apply Now". No parking. UK right-to-volunteer needed.' },
+            { id: 'gaudeamus', n: 'Gaudeamus Festival', s: 74, e: 78, st: 'open', stars: 3, dates: '9 – 13 Sep', dur: 5, loc: 'Utrecht, NL', pop: 'Utrecht ~367k', gen: 'Contemporary / new music', h: 'Mivos Quartet, TAK Ensemble, IEMA-Ensemble, New European Ensemble, The Carice Singers', vol: 'Open, final few slots; min 1 day, 4–6h parts.' },
+            { id: 'hopduvel', n: 'Hopduvel', s: 76, e: 78, st: 'check', stars: 2, dates: '11 – 13 Sep', dur: 3, loc: 'Asse, BE', pop: 'Asse ~34k (Brussels ~1.25m nearby)', gen: 'Belgian pop, dance', h: 'Milk Inc., Laura Tesoro, Aaron Blommaert, Level Six, Like Me', vol: 'Committee model via hopduvel.be/help-mee (not Eventication).' }
+        ];
+
+        const GOKEY = 'festgantt_go', RKEY = 'festgantt_rate';
+        let go = ld(GOKEY), rate = ld(RKEY);
+        function ld(k) { try { const s = localStorage.getItem(k); if (s) return JSON.parse(s); } catch (e) { } return {}; }
+        function sv(k, o) { try { localStorage.setItem(k, JSON.stringify(o)); } catch (e) { } }
+        function starsOf(f) { return rate[f.id] != null ? rate[f.id] : f.stars; }
+        function clashSet() {
+            const p = F.filter(f => go[f.id]), c = {};
+            for (let i = 0; i < p.length; i++)for (let j = i + 1; j < p.length; j++) { const a = p[i], b = p[j]; if (a.s <= b.e && b.s <= a.e) { c[a.id] = true; c[b.id] = true; } } return c;
+        }
+
+        const STARW = 72, LBL = 180;
+        const g = document.getElementById('gantt'), wrap = document.getElementById('wrap'), tip = document.getElementById('tip');
+
+        function render() {
+            const clash = clashSet();
+            let html = '';
+            html += '<div class="head"><div style="width:' + (STARW + LBL) + 'px; flex:none;"></div><div class="track" style="height:16px;">';
+            MONTHS.forEach(m => html += '<span class="mlabel" style="left:' + (m.d / SPAN * 100) + '%">' + m.n + '</span>');
+            html += '</div></div>';
+            F.forEach((f, i) => {
+                const on = !!go[f.id], cl = !!clash[f.id], sc = starsOf(f);
+                const left = f.s / SPAN * 100, w = Math.max((f.e - f.s) / SPAN * 100, 1.6);
+                const col = on ? (cl ? CLASH : GO) : ST[f.st];
+                const rb = on ? (cl ? 'rgba(255,45,45,.13)' : 'rgba(255,138,0,.13)') : (i % 2 ? 'transparent' : 'var(--row)');
+                let st = ''; for (let k = 1; k <= 5; k++)st += '<span class="star' + (k <= sc ? ' on' : '') + '" data-id="' + f.id + '" data-n="' + k + '">★</span>';
+                html += '<div class="row" style="background:' + rb + '">';
+                html += '<div class="stars" style="width:' + STARW + 'px">' + st + '</div>';
+                html += '<div class="name hov" data-id="' + f.id + '" style="width:' + LBL + 'px;' + (on ? 'font-weight:600;' : '') + '">' + (cl ? '⚠ ' : '') + f.n + '</div>';
+                html += '<div class="track">';
+                MONTHS.forEach(m => html += '<div class="grid" style="left:' + (m.d / SPAN * 100) + '%"></div>');
+                html += '<div class="bar hov" data-id="' + f.id + '" style="left:' + left + '%; width:' + w + '%; background:' + col + ';' + (on ? 'box-shadow:0 0 0 1.5px ' + (cl ? CLASH : GO) + ';' : '') + '"></div>';
+                html += '</div></div>';
+            });
+            g.innerHTML = html;
+
+            function toggle(id) { if (go[id]) delete go[id]; else go[id] = true; sv(GOKEY, go); render(); }
+            g.querySelectorAll('.hov').forEach(el => {
+                el.addEventListener('click', () => toggle(el.dataset.id));
+                el.addEventListener('mouseenter', () => showTip(el, clash));
+                el.addEventListener('mouseleave', () => tip.style.display = 'none');
+            });
+            g.querySelectorAll('.star').forEach(s => s.addEventListener('click', e => {
+                e.stopPropagation(); rate[s.dataset.id] = +s.dataset.n; sv(RKEY, rate); render();
+            }));
+        }
+
+        function showTip(a, clash) {
+            const f = F.find(x => x.id === a.dataset.id), sc = starsOf(f), cl = !!clash[f.id];
+            tip.innerHTML = '<div class="t">' + f.n + (cl ? ' <span style="color:' + CLASH + ';font-size:11px">· clashes</span>' : '') + '</div>' +
+                '<div class="l">📅 ' + f.dates + ' · ' + f.dur + ' days<br>📍 ' + f.loc + '<br>🏙 ' + f.pop + '<br>🎵 ' + f.gen +
+                '<div style="margin-top:4px"><span class="badge" style="background:' + STC[f.st] + '">' + STT[f.st] + '</span> <span style="color:var(--star)">' + '★'.repeat(sc) + '</span></div>' +
+                '<div style="margin-top:4px;color:var(--text)">' + f.vol + '</div>' +
+                '<div style="margin-top:4px;color:var(--faint)">★ ' + f.h + '</div></div>';
+            tip.style.display = 'block';
+            const wr = wrap.getBoundingClientRect(), ar = a.getBoundingClientRect();
+            let top = ar.top - wr.top + 22, leftpx = ar.left - wr.left;
+            const maxL = wr.width - 258; if (leftpx > maxL) leftpx = maxL; if (leftpx < 0) leftpx = 0;
+            const th = tip.offsetHeight; if (top + th > wr.height) top = ar.top - wr.top - th - 6;
+            tip.style.left = leftpx + 'px'; tip.style.top = top + 'px';
+        }
+        render();
+    </script>
+</body>
+
+</html>
