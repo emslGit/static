@@ -271,10 +271,14 @@
         cross-check; not affiliated with any festival.</footer>
 
     <script>
-        const SPAN = 78;
-        const MONTHS = [{ n: 'Jul', d: 4 }, { n: 'Aug', d: 35 }, { n: 'Sep', d: 66 }];
-        // week dividers fall on Mondays, counted in days from the 27 Jun 2026 anchor (index 0)
+        const SPAN = 102;
+        const CHART_START = new Date(2026, 5, 3);
+        const DATA_OFFSET = 24; // existing festival offsets are counted from the old 27 Jun 2026 anchor
+        const MONTHS = [{ n: 'Jun', d: 0 }, { n: 'Jul', d: 28 }, { n: 'Aug', d: 59 }, { n: 'Sep', d: 90 }];
+        // week dividers fall on Mondays, counted in days from the 3 Jun 2026 chart anchor (index 0)
         const MONTHDAYS = MONTHS.map(m => m.d);
+        const start = f => f.s + DATA_OFFSET;
+        const end = f => f.e + DATA_OFFSET;
         function isoWeek(dt) {
             const d = new Date(Date.UTC(dt.getFullYear(), dt.getMonth(), dt.getDate()));
             d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
@@ -282,7 +286,7 @@
             return Math.ceil((((d - y) / 86400000) + 1) / 7);
         }
         const WEEKS = (() => {
-            const anchor = new Date(2026, 5, 27), out = [];
+            const anchor = CHART_START, out = [];
             for (let d = 0; d <= SPAN; d++) {
                 const dt = new Date(anchor);
                 dt.setDate(anchor.getDate() + d);
@@ -296,16 +300,21 @@
         const GO = 'var(--go)', CLASH = 'var(--clash)';
 
         const F = [
+            { id: 'primavera', n: 'Primavera Sound Barcelona', s: -24, e: -20, st: 'closed', stars: 2, dates: '3 – 7 Jun', dur: 5, loc: 'Barcelona, ES · Parc del Fòrum', pop: 'Barcelona ~1.7m', gen: 'Indie, electronic, pop, rock', h: 'Overmono, The Cure, Doja Cat, The xx, Gorillaz, Massive Attack, Skrillex, Peggy Gou', vol: 'Completed by 10 Jun. Official tickets had sold out; add only as a target-artist reference.' },
+            { id: 'bonnaroo', n: 'Bonnaroo', s: -16, e: -13, st: 'check', stars: 1, dates: '11 – 14 Jun', dur: 4, loc: 'Manchester, Tennessee, US · Bonnaroo Farm', pop: 'Manchester ~13k (Nashville ~689k nearby)', gen: 'Rock, electronic, hip-hop, pop', h: 'Chase & Status, Skrillex, The Strokes, Noah Kahan, Turnstile, Teddy Swims, RÜFÜS DU SOL, Kesha', vol: 'Ticket on sale with some tiers waitlisted. US trip; volunteer route not checked.' },
+            { id: 'sonar', n: 'Sónar', s: -9, e: -7, st: 'check', stars: 2, dates: '18 – 20 Jun', dur: 3, loc: 'Barcelona, ES · Fira Gran Via', pop: 'Barcelona ~1.7m', gen: 'Electronic, club, experimental', h: 'Joy Orbison, Kelis, Skepta, Charlotte de Witte, Amelie Lens, Modeselektor, Nia Archives', vol: 'Tickets on sale. Strong electronic fit; volunteer route not checked.' },
+            { id: 'boilerroomnottingham', n: 'Boiler Room: Nottingham', s: -1, e: -1, st: 'check', stars: 2, dates: '26 Jun', dur: 1, loc: 'Nottingham, UK · Colwick Country Park', pop: 'Nottingham ~324k', gen: 'Electronic, bass, house', h: 'Overmono, Joy Orbison', vol: 'Tickets on sale. One-day target-artist hit; no volunteer route assumed.' },
             { id: 'roskilde', n: 'Roskilde Festival', s: 0, e: 7, st: 'open', stars: 3, dates: '27 Jun – 4 Jul', dur: 8, loc: 'Roskilde, DK · ~1h flight', pop: 'Roskilde ~53k (Copenhagen ~672k nearby)', gen: 'Indie, rock, pop, electronic', h: 'The Cure, Gorillaz, Jennie, Little Simz, Kneecap, David Byrne, Wolf Alice, Djrum', vol: 'GA sold out — volunteering now main way in. Best perks: village, food, showers.' },
-            { id: 'kappa', n: 'Kappa FuturFestival', s: 6, e: 8, st: 'closed', stars: 0, dates: '3 – 5 Jul', dur: 3, loc: 'Turin, IT', pop: 'Turin ~859k', gen: 'Techno, house', h: 'Skrillex b2b Four Tet, Peggy Gou, Solomun, Charlotte de Witte, Amelie Lens, Carl Craig', vol: 'No volunteer route. Sold out (waitlist).' },
+            { id: 'kappa', n: 'Kappa FuturFestival', s: 6, e: 8, st: 'closed', stars: 0, dates: '3 – 5 Jul', dur: 3, loc: 'Turin, IT', pop: 'Turin ~859k', gen: 'Techno, house', h: 'Disclosure DJ set, Skrillex b2b Four Tet, Peggy Gou, Solomun, Charlotte de Witte, Amelie Lens, Carl Craig', vol: 'No volunteer route. Sold out (waitlist).' },
             { id: 'lovesupreme', n: 'Love Supreme', s: 6, e: 8, st: 'closed', stars: 1, dates: '3 – 5 Jul', dur: 3, loc: 'Glynde, East Sussex, UK', pop: 'Glynde village ~200 (Brighton ~277k nearby)', gen: 'Jazz, soul, funk', h: 'Loyle Carner, Ezra Collective, De La Soul, Maxwell, Sister Sledge, Samara Joy', vol: 'Festaff waitlist only.' },
             { id: 'loveintl', n: 'Love International', s: 11, e: 17, st: 'check', stars: 1, dates: '8 – 14 Jul', dur: 7, loc: 'Tisno, HR · ~2.5h flight', pop: 'Tisno ~3k (Šibenik ~34k nearby)', gen: 'House, disco, Balearic', h: 'John Talabot, Optimo, Palms Trax, Midland, Crazy P, Daniel Avery, Nightmares on Wax', vol: 'House/disco heaven but volunteer status unconfirmed. Direct outreach.' },
-            { id: 'audioriver', n: 'Audioriver', s: 13, e: 15, st: 'closed', stars: 0, dates: '10 – 12 Jul', dur: 3, loc: 'Łódź, PL', pop: 'Łódź ~646k', gen: 'Techno, DnB, electronic', h: 'The Prodigy, ZHU, Boys Noize, Ben Klock, I Hate Models, Ellen Allien, Len Faki', vol: 'No official volunteer route. Paid ticket only.' },
+            { id: 'slottsfjell', n: 'Slottsfjell', s: 12, e: 13, st: 'check', stars: 2, dates: '9 – 10 Jul', dur: 2, loc: 'Tønsberg, NO · Kaldnes', pop: 'Tønsberg ~57k', gen: 'Electronic, pop, indie', h: 'Disclosure, Fisher, Dom Dolla, Tom Odell, Cezinando, Astrid S, Marstein', vol: 'Mixed ticket availability. Strong Disclosure hit; volunteer route not checked.' },
+            { id: 'audioriver', n: 'Audioriver', s: 13, e: 15, st: 'closed', stars: 0, dates: '10 – 12 Jul', dur: 3, loc: 'Łódź, PL', pop: 'Łódź ~646k', gen: 'Techno, DnB, electronic', h: 'Disclosure DJ set, The Prodigy, ZHU, Boys Noize, Ben Klock, I Hate Models, Ellen Allien, Len Faki', vol: 'No official volunteer route. Paid ticket only.' },
             { id: 'latitude', n: 'Latitude Festival', s: 26, e: 29, st: 'open', stars: 2, dates: '23 – 26 Jul', dur: 4, loc: 'Henham Park, Suffolk, UK', pop: 'Near Southwold (Ipswich ~144k nearby)', gen: 'Indie, pop, alternative', h: 'David Byrne, Teddy Swims, Lewis Capaldi, Wet Leg, Self Esteem, The Last Dinner Party, The Flaming Lips', vol: 'Hotbox open; 3×8h shifts; deposit. UK right-to-volunteer needed.' },
             { id: 'outlook', n: 'Outlook Festival', s: 26, e: 30, st: 'check', stars: 1, dates: '23 – 27 Jul', dur: 5, loc: 'Tisno, HR · ~2.5h flight', pop: 'Tisno ~3k (Šibenik ~34k nearby)', gen: 'Bass, DnB, dub, garage', h: 'Chase & Status, Goldie, Ben UFO, Kode9, Mala, Fabio & Grooverider', vol: 'Near-perfect genre fit but NO volunteer route found. Email The Garden Productions.' },
             { id: 'dekmantel', n: 'Dekmantel', s: 32, e: 36, st: 'open', stars: 3, dates: '29 Jul – 2 Aug', dur: 5, loc: 'Amsterdam, NL · ~2h flight', pop: 'Amsterdam ~942k', gen: 'House, techno, electro, breaks', h: 'Jeff Mills, Skrillex, DARKSIDE, Ben UFO, Ricardo Villalobos, Helena Hauff, James Holden', vol: 'Registration open, roles allocated early June. Free access + merch/food card.' },
             { id: 'letitroll', n: 'Let It Roll', s: 33, e: 36, st: 'closed', stars: 3, dates: '30 Jul – 1 Aug', dur: 3, loc: 'Most, CZ · ~2h flight', pop: 'Most ~63.7k', gen: 'Drum & bass', h: 'Pendulum, Netsky, Rusko, LTJ Bukem, Chase & Status, Wilkinson, Camo & Krooked', vol: 'Deadline was end of May — likely closed. Full-ticket-price deposit.' },
-            { id: 'odays', n: 'O Days', s: 33, e: 35, st: 'open', stars: 3, dates: '30 Jul – 1 Aug', dur: 3, loc: 'Copenhagen, DK', pop: 'Copenhagen ~672k', gen: 'House, electronic, pop', h: 'Disclosure, Mall Grab, Nia Archives, Joy Orbison, Yaeji, Courtesy, The Dare', vol: 'Crewstack registration live (CSV "waitlist" outdated).' },
+            { id: 'odays', n: 'O Days', s: 33, e: 35, st: 'open', stars: 3, dates: '30 Jul – 1 Aug', dur: 3, loc: 'Copenhagen, DK', pop: 'Copenhagen ~672k', gen: 'House, electronic, pop', h: 'Disclosure DJ set, Joy Orbison, Overmono, Mall Grab, Nia Archives, Yaeji, Courtesy, The Dare', vol: 'Crewstack registration live (CSV "waitlist" outdated).' },
             { id: 'atn', n: 'All Together Now', s: 33, e: 36, st: 'check', stars: 2, dates: '30 Jul – 2 Aug', dur: 4, loc: 'Curraghmore, Waterford, IE', pop: 'Portlaw ~2k (Waterford ~54k nearby)', gen: 'Indie, electronic, folk', h: 'Pulp, Underworld, Ezra Collective, Floating Points, Christy Moore, Mogwai, Kae Tempest', vol: 'No public route found — email info@alltogethernow.ie. Sold out.' },
             { id: 'campbestival', n: 'Camp Bestival Dorset', s: 33, e: 36, st: 'open', stars: 1, dates: '30 Jul – 2 Aug', dur: 4, loc: 'Lulworth Castle, Dorset, UK', pop: 'Near Wareham (Bournemouth ~196k nearby)', gen: 'Pop, dance, family', h: 'Fatboy Slim, Bastille, Self Esteem, De La Soul, Billy Ocean, Example, Black Grape', vol: 'Hotbox/Charity Concierge open; fills fast. UK right-to-volunteer needed.' },
             { id: 'uppsala', n: 'Uppsala Reggae Festival', s: 34, e: 35, st: 'check', stars: 1, dates: '31 Jul – 1 Aug', dur: 2, loc: 'Uppsala, SE · ~50min train', pop: 'Uppsala ~177k', gen: 'Reggae, dancehall', h: 'The Skatalites, Barrington Levy, Mr. Vegas, Lutan Fyah, Dani M, Pressure Busspipe', vol: 'Closest to home. Crew via crew@uppsalareggaefestival.com, terms unposted. Genre stretch.' },
@@ -322,6 +331,7 @@
             { id: 'campercalling', n: 'Camper Calling', s: 62, e: 64, st: 'open', stars: 2, dates: '28 – 30 Aug', dur: 3, loc: 'Ragley Hall, Warwickshire, UK', pop: 'Near Alcester (Birmingham ~1.14m nearby)', gen: 'Pop, disco, classic hits', h: 'Nile Rodgers & CHIC, Primal Scream, Shed Seven, James Morrison, Sigala, Vengaboys, Five', vol: 'My Cause UK open; £150 deposit; 3×8h. UK right-to-volunteer needed.' },
             { id: 'superbloom', n: 'Superbloom', s: 63, e: 69, st: 'open', stars: 2, dates: '29 Aug – 4 Sep', dur: 7, loc: 'Munich, DE · ~1.5h flight', pop: 'Munich ~1.51m', gen: 'Pop, electronic, indie', h: 'Lorde, Lewis Capaldi, Zara Larsson, Kygo, Paul Kalkbrenner, Ayliva, Sombr, Tom Odell', vol: 'Volunteer via "Inklusion Muss Laut Sein" BUDDIE/awareness team (green-vest inclusion helpers) — flexible shifts, perks incl. shirt + catering. Register at i-m-l-s.com / info@i-m-l-s.com. Official site lists no general crew route.' },
             { id: 'forwards', n: 'Forwards Bristol', s: 63, e: 64, st: 'open', stars: 2, dates: '29 – 30 Aug', dur: 2, loc: 'Bristol, UK', pop: 'Bristol ~483k', gen: 'Indie, R&B, electronic', h: 'Tems, Self Esteem, Wet Leg, Little Simz, Oklou, Amyl & The Sniffers, Maribou State', vol: 'My Cause UK "Apply Now". No parking. UK right-to-volunteer needed.' },
+            { id: 'arc', n: 'ARC Music Festival', s: 69, e: 72, st: 'check', stars: 2, dates: '4 – 7 Sep', dur: 4, loc: 'Chicago, US · Union Park', pop: 'Chicago ~2.7m', gen: 'House, techno, bass', h: 'Chase & Status, Joy Orbison b2b Ben UFO', vol: 'Tickets on sale. Major target-artist overlap; US trip and volunteer route not checked.' },
             { id: 'gaudeamus', n: 'Gaudeamus Festival', s: 74, e: 78, st: 'open', stars: 2, dates: '9 – 13 Sep', dur: 5, loc: 'Utrecht, NL', pop: 'Utrecht ~367k', gen: 'Contemporary / new music', h: 'Mivos Quartet, TAK Ensemble, IEMA-Ensemble, New European Ensemble, The Carice Singers', vol: 'Open, final few slots; min 1 day, 4–6h parts.' },
             { id: 'hopduvel', n: 'Hopduvel', s: 76, e: 78, st: 'check', stars: 1, dates: '11 – 13 Sep', dur: 3, loc: 'Asse, BE', pop: 'Asse ~34k (Brussels ~1.25m nearby)', gen: 'Belgian pop, dance', h: 'Milk Inc., Laura Tesoro, Aaron Blommaert, Level Six, Like Me', vol: 'Committee model via hopduvel.be/help-mee (not Eventication).' }
         ];
@@ -332,7 +342,7 @@
         function sv(k, o) { try { localStorage.setItem(k, JSON.stringify(o)); } catch (e) { } }
         function clashSet() {
             const p = F.filter(f => go[f.id]), c = {};
-            for (let i = 0; i < p.length; i++)for (let j = i + 1; j < p.length; j++) { const a = p[i], b = p[j]; if (a.s <= b.e && b.s <= a.e) { c[a.id] = true; c[b.id] = true; } } return c;
+            for (let i = 0; i < p.length; i++)for (let j = i + 1; j < p.length; j++) { const a = p[i], b = p[j]; if (start(a) <= end(b) && start(b) <= end(a)) { c[a.id] = true; c[b.id] = true; } } return c;
         }
 
         const g = document.getElementById('gantt'), wrap = document.getElementById('wrap'), pop = document.getElementById('pop');
@@ -369,7 +379,7 @@
             html += '</div></div>';
             F.forEach((f, i) => {
                 const on = !!go[f.id], cl = !!clash[f.id];
-                const left = f.s / SPAN * 100, w = Math.max((f.e - f.s) / SPAN * 100, 1.6);
+                const left = start(f) / SPAN * 100, w = Math.max((end(f) - start(f)) / SPAN * 100, 1.6);
                 const col = on ? (cl ? CLASH : GO) : ST[f.st];
                 const rb = on ? (cl ? 'rgba(255,45,45,.13)' : 'rgba(255,138,0,.13)') : (i % 2 ? 'transparent' : 'var(--row)');
                 // name sits beside the bar: right of it when the bar is on the left half, left of it otherwise
